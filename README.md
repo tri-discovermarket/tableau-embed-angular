@@ -1,27 +1,66 @@
-# TableauEmbedAngular
+# Tableau Embed API Reference: AngularJS
+This project shows how to build a web app that embeds dashboards from Tableau Server/Online, using AngularJS.
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 13.3.5.
+# Project Setup
+```
+# Clone the repo
+git clone https://github.com/takashibinns/tableau-angularjs-sample.git
 
-## Development server
+# Change into the application code directory
+cd tableau-embed-angular
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+# Install the Angular CLI
+npm install -g @angular/cli@latest
 
-## Code scaffolding
+# Install npm-run-all which allows you to run multiple commands at the same time
+npm install npm-run-all -g --save-dev
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+# Install the application dependencies
+npm install
+```
+This web app also requires some configuration via environment variables.  Create a new file named **.env** within the tableau-embed-api directory, and make sure it looks like this:
+```
+PORT=8080
+TABLEAU_URL=<url-for-your-tableau-server-or-tableau-online>
+TABLEAU_API_VERSION=3.15
+TABLEAU_SITE=<name-of-tableau-site>
+TABLEAU_PROJECT=<name-of-project-from-tableau>
+TABLEAU_CONNECTEDAPP_CLIENTID=<client-id>
+TABLEAU_CONNECTEDAPP_SECRETID=<secret-id>
+TABLEAU_CONNECTEDAPP_SECRETVALUE=<secret-value>
+ENCRYPTION_STRING=AnyTextWillWorkHere
+APP_TOKEN_NAME=apptoken
+```
+* If you do not use sites on Tableau Server, just leave the TABLEAU_SITE variable blank
+* TABLEAU_PROJECT is used to filter the list of dashboards available to the Angular app
+* If you have not setup a connected app in Tableau before, check out the documentation [here](https://help.tableau.com/current/online/en-us/connected_apps.htm#create-a-connected-app)
 
-## Build
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+##  Development
+If you are looking to get this web app up and running locally in development mode, run the following commands to setup your project.
+```
+# Start the frontend (Angular) and backend (Express)
+npm-run-all -l -p dev-angular dev-express
+```
+You should be able to access the running application at http://localhost:4200.  The back end is running on port 8080, but we use a proxy config to ensure everything is accessible through the same URL & port.
 
-## Running unit tests
+## Production
+If you are looking to deploy this application in production, the build process is slightly different.  First we build the Angular app using ng build, and then we can host the static files using Node/Express
+```
+# Build the Angular App (output to dist folder)
+ng build
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+# Run the Express node app
+node src/backend/server.js
+```
+You should be able to access the running application at http://localhost:8080 (unless you changed the PORT environment variable).
 
-## Running end-to-end tests
+## Docker
+What if you want to deploy into a docker container? This project already contains a Dockerfile so you just need to run some standard docker commands:
+```
+# Build the docker image
+docker build . -t tableau-embed-api-angular
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+# Start the image
+run --env-file .env -p 8080:8080 tableau-embed-api-angular
+```
